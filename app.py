@@ -128,7 +128,7 @@ else:
             st.subheader("📊 Marks Distribution Across Class")
             fig_dist = px.histogram(df_exam, x=total_marks_col, nbins=20, title="Class Score Distribution", color_discrete_sequence=['#3366cc'])
             st.plotly_chart(fig_dist, use_container_width=True)
-
+            
     # TAB 2: Average Ranking Leaderboard
     with tab2:
         st.subheader("🏆 Overall Average Rank Leaderboard")
@@ -137,9 +137,13 @@ else:
         df_avg_rank = calculate_average_rankings(exam_data)
         
         if df_avg_rank is not None and not df_avg_rank.empty:
-            # Filter option by minimum exams attempted
             max_exams = int(df_avg_rank['Exams Attempted'].max())
-            min_exams = st.slider("Filter students who took at least N exams:", 1, max_exams, 1)
+            
+            # Show the slider only if multiple exams exist
+            if max_exams > 1:
+                min_exams = st.slider("Filter students who took at least N exams:", 1, max_exams, 1)
+            else:
+                min_exams = 1
             
             filtered_rank_df = df_avg_rank[df_avg_rank['Exams Attempted'] >= min_exams]
             
@@ -155,6 +159,7 @@ else:
             )
         else:
             st.warning("Could not find 'STUDENT NAME' or 'Rank' columns across the uploaded files.")
+            
 
     # TAB 3: Multi-Exam Comparisons & Drop Tracker
     with tab3:
