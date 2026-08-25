@@ -20,27 +20,33 @@ st.markdown("Upload one or multiple exam Excel reports to instantly analyze stud
 # Helper function to parse exam Excel sheets
 def parse_exam_file(file):
     excel_file = pd.ExcelFile(file)
-    df_raw = pd.read_excel(excel_file, sheet_name=0)
     
-    # Locate header row containing 'STUDENT NAME' or 'OMR NUMBER'
+    # Read the raw file with NO headers to find the exact row index
+    df_raw = pd.read_excel(excel_file, sheet_name=0, header=None)
+    
     header_idx = 0
+    # Scan every row until we find the column names
     for idx, row in df_raw.iterrows():
-        row_str = [str(val).upper() for val in row.values]
-        if any("STUDENT NAME" in s or "OMR" in s for s in row_str):
+        # Convert row values to uppercase strings for safe matching
+        row_str = [str(val).upper().strip() for val in row.values]
+        if "STUDENT NAME" in row_str or "OMR NUMBER" in row_str:
             header_idx = idx
             break
             
+    # Re-read the file using the correctly identified row as the header
     df = pd.read_excel(excel_file, sheet_name=0, header=header_idx)
+    
+    # Clean up column names (remove extra spaces)
     df.columns = [str(c).strip() for c in df.columns]
     
-    # Clean numeric columns
+    # Convert score/rank columns to numbers so we can do math on them
     numeric_keywords = ['Marks', 'Rank', 'Correct', 'Incorrect', 'Unattended']
     for col in df.columns:
         if any(kw.lower() in col.lower() for kw in numeric_keywords):
             df[col] = pd.to_numeric(df[col], errors='coerce')
             
     return df
-
+    
 
 # Sidebar File Uploader
 st.sidebar.header("📁 File Upload")
