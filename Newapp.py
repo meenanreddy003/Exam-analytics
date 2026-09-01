@@ -9,13 +9,20 @@ st.set_page_config(page_title="Data Analyzer", layout="wide")
 
 st.title("Comprehensive Data Analyzer")
 
-# 1. File Uploader
-uploaded_file = st.file_uploader("Upload a CSV dataset to begin", type=["csv"])
+# 1. File Uploader accepting CSV and Excel
+uploaded_file = st.file_uploader("Upload a CSV or Excel dataset to begin", type=["csv", "xlsx", "xls"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+    # Read CSV or Excel depending on the file extension
+    if uploaded_file.name.endswith('.csv'):
+        df = pd.read_csv(uploaded_file)
+    else:
+        df = pd.read_excel(uploaded_file)
+        
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     
+    # Rest of your app logic follows...
+
     # 2. Basic Profiling
     st.header("1. Data Overview")
     col1, col2 = st.columns(2)
